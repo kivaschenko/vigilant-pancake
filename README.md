@@ -1,2 +1,3 @@
 # vigilant-pancake
-Web app for ads in agriculture business with geolocation and search on map. Designed on stack FastAPI, React and MongoDB (FARM). While there is just a pet project.
+This project is a private attempt to build an e-commerce server according to my specific requirements. 
+The main focus of the architecture strategy is TDD (test driven development) based on the book (https://github.com/cosmicpython/code/branches/all).
