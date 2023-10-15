@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  db:
+    container_name: vigilant_pancake_db
+    image: postgres:15-bullseye
+    restart: always
+    ports:
+      - 54321:5432
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --dbname=${DB_NAME} --host=localhost --port=5432 --username=${DB_USER}"]
+      interval: 2s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  pgadmin:
+    container_name: restaurant_pgadmin
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+    ports:
+      - 5050:80
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - pgadmin:/volume_pgadmin/
+
+volumes:
+  postgres:
+  pgadmin:
