@@ -1,6 +1,6 @@
 import pytest
 from datetime import date, timedelta
-from model import Batch, OrderLine, allocate, OutOfStock
+from domain.model import Batch, OrderLine, allocate, OutOfStock
 
 today = date.today()
 tomorrow = today + timedelta(days=1)
@@ -10,7 +10,6 @@ later = tomorrow + timedelta(days=10)
 def test_prefers_current_stock_batches_to_shipments():
     in_stock_batch = Batch('in-stock-batch', "RETRO-CLOCK", 100, eta=None)
     shipment_batch = Batch('shipment-batch', "RETRO-CLOCK", 100, eta=tomorrow)
-    
     line = OrderLine('order-123', "RETRO-CLOCK", 10)
 
     allocate(line, [in_stock_batch, shipment_batch])
@@ -23,7 +22,6 @@ def test_prefers_earlier_batches():
     earlist = Batch('earler-001', 'MINIMALIST-SPOON', 100, eta=today)
     medium = Batch('medium-001', 'MINIMALIST-SPOON', 50, eta=tomorrow)
     latest = Batch('later-111', 'MINIMALIST-SPOON', 80, eta=later)
-
     line = OrderLine('order-1123', 'MINIMALIST-SPOON', 20)
 
     allocate(line, [earlist, medium, latest])
@@ -35,11 +33,9 @@ def test_prefers_earlier_batches():
 def test_returns_allocated_batch():
     in_stock_batch = Batch('in-stock-123', 'PRETTY-SOFA', 12, eta=None)
     shipment_batch = Batch('ship-1234', 'PRETTY-SOFA', 24, eta=tomorrow)
-
     line = OrderLine('order-1123', 'PRETTY-SOFA', 3)
-
     allocation = allocate(line, [in_stock_batch, shipment_batch])
-    
+
     assert allocation == in_stock_batch.reference
 
 

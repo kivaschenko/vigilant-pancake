@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 dotenv_path = Path(__file__).parent / ".env"
 load_dotenv(dotenv_path)
 
-def get_postgres_url():
+
+def get_postgres_uri():
     host = os.environ.get("DB_HOST", "localhost")
     port = 54321 if host == "localhost" else 5432
     password = os.environ.get("DB_PASSWORD", "abc123")

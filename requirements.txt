@@ -3,4 +3,4 @@ requests==2.31.0
 SQLAlchemy==2.0.21
 psycopg2-binary
 python-dotenv
-Flask
+Flask==3.0.0
