@@ -12,10 +12,11 @@ def get_postgres_url():
     user = os.environ.get("DB_USER")
     db_name = os.environ.get("DB_NAME")
     uri = f"postgresql://{user}:{password}@{host}:{port}/{db_name}"
+    print("DB URI:", uri)
     return uri
 
 
 def get_api_url():
     host = os.environ.get("API_HOST", "localhost")
-    port = 5005 if host == "localhost" else 80
+    port = 5000 if host == "localhost" else 80
     return f"http://{host}:{port}"

@@ -28,3 +28,7 @@ def allocate_endpoint():
         return {"message": str(e)}, 400
 
     return {"batchref": batchref}, 201
+
+@app.route("/", methods=["GET"])
+def hello():
+    return 'Hello, world!'
