@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "vigilant-pancake"
+version = "0.1.0"
+description = ""
+authors = ["Kostiantyn Ivashchenko <kivaschenko@protonmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pytest = "^8.3.1"
+requests = "^2.32.3"
+SQLAlchemy = "^2.0.31"
+python-dotenv = "^1.0.1"
+Flask = "^3.0.3"
+psycopg2-binary = "^2.9.9"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
