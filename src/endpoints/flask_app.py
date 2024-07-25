@@ -4,9 +4,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 import config
-from domain import model
-from adapters import orm, repository
-from service_layer import services
+from src.domain.entities import model
+from src.adapters import orm, repository
+from src.application import services
 
 
 orm.start_mappers()

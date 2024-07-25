@@ -29,6 +29,13 @@ def post_to_add_batch(ref, sku, qty, eta):
     assert r.status_code == 201
 
 
+@pytest.fixture(autouse=True)
+def clean_database(postgres_db):
+    # Clean up the database after each test
+    # Add your cleanup code here
+    pass
+
+
 @pytest.mark.usefixtures("postgres_db")
 @pytest.mark.usefixtures("restart_api")
 def test_happy_path_returns_201_and_allocated_batch():

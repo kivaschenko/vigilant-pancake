@@ -1,5 +1,5 @@
 import abc
-from domain import model
+from src.domain import model
 
 
 class AbstractRepository(abc.ABC):
@@ -12,7 +12,7 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
 
-class SqlAlchemyRepository(AbstractRepository):
+class SQLAlchemyRepository(AbstractRepository):
     def __init__(self, session):
         self.session = session
 

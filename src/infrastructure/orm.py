@@ -2,7 +2,7 @@ from sqlalchemy import Table, MetaData, Column, Integer, String, Date, ForeignKe
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import registry
 
-from domain import model
+from src.domain import model
 
 
 metadata = MetaData()
@@ -47,3 +47,4 @@ def start_mappers():
             )
         },
     )
+    
