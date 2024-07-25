@@ -19,7 +19,7 @@ class Batch:
         self.reference = ref
         self.sku = sku
         self.eta = eta
-        self._allocations : Set[OrderLine] = set() 
+        self._allocations: Set[OrderLine] = set()
         self._purchased_quantity = qty
 
     def __repr__(self):
