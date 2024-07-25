@@ -1,6 +1,6 @@
 import pytest
-from src.adapters import repository
-from src.application import services
+from src.infrastructure import repository
+from src.application import order_service as services
 
 
 class FakeRepository(repository.AbstractRepository):
