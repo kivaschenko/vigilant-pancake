@@ -1,26 +1,34 @@
 import abc
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from app.domain import model
 
 
 class AbstractRepository(abc.ABC):
     @abc.abstractmethod
-    def add(self, batch: model.Batch):
+    async def add(self, batch: model.Batch):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, reference) -> model.Batch:
+    async def get(self, reference) -> model.Batch:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    async def list(self):
         raise NotImplementedError
 
 
 class SQLAlchemyRepository(AbstractRepository):
-    def __init__(self, session):
+    def __init__(self, session: AsyncSession):
         self.session = session
 
-    def add(self, batch):
-        self.session.add(batch)
+    async def add(self, batch):
+        await self.session.add(batch)
 
-    def get(self, reference):
-        return self.session.query(model.Batch).filter_by(reference=reference).one()
+    async def get(self, reference) -> model.Batch:
+        result = await self.session.query(model.Batch).filter_by(reference=reference)
+        return result.scalar_one()
 
-    def list(self):
-        return self.session.query(model.Batch).all()
+    async def list(self):
+        result = await self.session.execute(select(model.Batch))
+        return result.scalars().all()
