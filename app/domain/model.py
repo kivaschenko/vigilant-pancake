@@ -23,7 +23,7 @@ class Batch:
         self._purchased_quantity = qty
 
     def __repr__(self):
-        return f'<Batch(reference={self.reference})'
+        return f"<Batch(reference={self.reference})"
 
     def __eq__(self, other):
         if not isinstance(other, Batch):
@@ -32,7 +32,7 @@ class Batch:
 
     def __hash__(self):
         return hash(self.reference)
-    
+
     def __gt__(self, other):
         if self.eta is None:
             return False
@@ -66,4 +66,4 @@ def allocate(line: OrderLine, batches: List[Batch]) -> str:
         batch.allocate(line)
         return batch.reference
     except StopIteration:
-        raise OutOfStock(f'Articule {line.sku} does not allowed at the moment.')
+        raise OutOfStock(f"Articule {line.sku} does not allowed at the moment.")

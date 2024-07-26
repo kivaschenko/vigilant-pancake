@@ -2,7 +2,7 @@ from sqlalchemy import Table, MetaData, Column, Integer, String, Date, ForeignKe
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import registry
 
-from domain import model
+from app.domain import model
 
 
 metadata = MetaData()
@@ -36,14 +36,32 @@ allocations = Table(
 )
 
 
+# To avoid the ArgumentError indicating that the class OrderLine already has a primary
+# mapper defined, you need to ensure that the start_mappers function is only called
+# once and that the mappers are cleared properly after each test.
+mappers_started = False
+
+
 def start_mappers():
+    global mappers_started
+    if mappers_started:
+        return
     lines_mapper = mapper_registry.map_imperatively(model.OrderLine, order_lines)
     mapper_registry.map_imperatively(
         model.Batch,
         batches,
         properties={
             "_allocations": relationship(
-                lines_mapper, secondary=allocations, collection_class=set,
+                lines_mapper,
+                secondary=allocations,
+                collection_class=set,
             )
         },
     )
+    mappers_started = True
+
+
+def clear_mappers():
+    mapper_registry.clear()
+    global mappers_started
+    mappers_started = False
