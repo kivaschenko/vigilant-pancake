@@ -4,12 +4,29 @@ The main focus of the architecture strategy is TDD (test driven development) bas
 
 ## Development
 
-#### Install dependecies
+```
+cd vigilant-pancake
+```
+
+### Run database
+
+```
+docker compose up -d
+```
+
+### Install dependecies
 ```
 poetry install
 ```
 
-#### Run app in development mode:
+### Run app in development mode:
+
 ```
 fastapi dev src/main.py
+```
+
+### Run tests
+
+```
+pytest
 ```

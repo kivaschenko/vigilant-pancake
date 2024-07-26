@@ -1,33 +1,26 @@
-version: '3.9'
+    version: '3'
+    services:
+      postgres:
+        image: postgres:latest
+        restart: always
+        #command: -c ssl=on -c ssl_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem -c ssl_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
+        environment:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: test_password
+        volumes:
+          - ./data:/var/lib/postgresql/data
+        ports:
+          - '172.17.0.1:5432:5432'
 
-services:
-
-  db:
-    container_name: vigilant_pancake_db
-    image: postgres:15
-    restart: always
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
-    volumes:
-      - postgres:/var/lib/postgresql/data
-    healthcheck:
-      test: CMD-SHELL ["executable", "arg"]
-      interval: 1m30s
-      timeout: 30s
-      retries: 5
-      start_period: 30s
-
-
-#  redis:
-#    image: redis:alpine
-#    ports:
-#      - "63791:6379"
-
-
-volumes:
-  postgres:
-
+      pgadmin4:
+        image: elestio/pgadmin:latest
+        restart: always
+        environment:
+          PGADMIN_DEFAULT_EMAIL: admin@email.com
+          PGADMIN_DEFAULT_PASSWORD: test_password
+          PGADMIN_LISTEN_PORT: 8080
+        ports:
+          - "172.17.0.1:8080:8080"
+        volumes:
+          - ./servers.json:/pgadmin4/servers.json
