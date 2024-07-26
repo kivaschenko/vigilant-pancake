@@ -1,5 +1,5 @@
 import abc
-from src.domain import model
+from app.domain import model
 
 
 class AbstractRepository(abc.ABC):
@@ -24,5 +24,3 @@ class SQLAlchemyRepository(AbstractRepository):
 
     def list(self):
         return self.session.query(model.Batch).all()
-
-

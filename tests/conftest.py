@@ -1,29 +1,14 @@
 import time
-from pathlib import Path
 
 import pytest
-import requests
-from requests.exceptions import ConnectionError
 from sqlalchemy.exc import OperationalError
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, clear_mappers
+from sqlalchemy.orm import sessionmaker
 
-from src.infrastructure.orm import metadata, start_mappers
-import config
+from app.infrastructure.orm import metadata, start_mappers, clear_mappers
+from config import Settings
 
-
-@pytest.fixture
-def in_memory_db():
-    engine = create_engine("sqlite:///:memory:")
-    metadata.create_all(engine)
-    return engine
-
-
-@pytest.fixture
-def session(in_memory_db):
-    start_mappers()
-    yield sessionmaker(bind=in_memory_db)()
-    clear_mappers()
+settings = Settings()
 
 
 def wait_for_postgres_to_come_up(engine):
@@ -36,20 +21,9 @@ def wait_for_postgres_to_come_up(engine):
     pytest.fail("Postgres never came up")
 
 
-def wait_for_webapp_to_come_up():
-    deadline = time.time() + 10
-    url = config.get_api_url()
-    while time.time() < deadline:
-        try:
-            return requests.get(url)
-        except ConnectionError:
-            time.sleep(0.5)
-    pytest.fail("API never came up")
-
-
 @pytest.fixture(scope="session")
 def postgres_db():
-    engine = create_engine(config.get_postgres_uri())
+    engine = create_engine(settings.DATABASE_URL)
     wait_for_postgres_to_come_up(engine)
     metadata.create_all(engine)
     return engine
@@ -58,12 +32,20 @@ def postgres_db():
 @pytest.fixture
 def postgres_session(postgres_db):
     start_mappers()
-    yield sessionmaker(bind=postgres_db)()
+    connection = postgres_db.connect()
+    transaction = connection.begin()
+    session = sessionmaker(bind=connection)()
+
+    yield session
+
+    session.close()
+    transaction.rollback()
+    connection.close()
     clear_mappers()
 
 
-@pytest.fixture
-def restart_api():
-    (Path(__file__).parent.parent / "src/main.py").touch()
-    time.sleep(0.5)
-    wait_for_webapp_to_come_up()
+@pytest.fixture(autouse=True)
+def clean_database(postgres_db):
+    """Clean up the database after each test"""
+    metadata.drop_all(postgres_db)
+    metadata.create_all(postgres_db)

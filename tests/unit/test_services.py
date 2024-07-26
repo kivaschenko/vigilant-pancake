@@ -1,9 +1,9 @@
 import pytest
-from src.infrastructure import repository
-from src.application import order_service as services
+from app.infrastructure import batch_repository
+from app.application.order_service import OrderService, InvalidSku
 
 
-class FakeRepository(repository.AbstractRepository):
+class FakeRepository(batch_repository.AbstractRepository):
     def __init__(self, batches=[]):
         self._batches = set(batches)
 
@@ -26,30 +26,35 @@ class FakeSession:
 
 def test_add_batch():
     repo, session = FakeRepository(), FakeSession()
-    services.add_batch("b1", "SOME-PRETTY-TABLE", 100, None, repo, session)
+    service = OrderService(repo=repo, session=session)
+    service.add_batch("b1", "SOME-PRETTY-TABLE", 100, None)
     assert repo.get("b1") is not None
     assert session.committed
 
 
 def test_allocate_returns_allocation():
     repo, session = FakeRepository(), FakeSession()
-    services.add_batch("batch-1", "SOME-PRETTY-TABLE", 100, None, repo, session)
-    result = services.allocate("order-1", "SOME-PRETTY-TABLE", 10, repo, session)
+    service = OrderService(repo=repo, session=session)
+    service.add_batch("batch-1", "SOME-PRETTY-TABLE", 100, None)
+    result = service.allocate("order-1", "SOME-PRETTY-TABLE", 10)
     assert result == "batch-1"
 
 
 def test_allocate_errors_invalid_sku():
     repo, session = FakeRepository(), FakeSession()
-    services.add_batch("batch-1", "WHITE-MIDDLE-TABLE", 100, None, repo, session)
+    service = OrderService(repo=repo, session=session)
+    service.add_batch("batch-1", "WHITE-MIDDLE-TABLE", 100, None)
 
-    with pytest.raises(services.InvalidSku, match='Invalid sku GREY-MIDDLE-TABLE'):
-        services.allocate("order-1", "GREY-MIDDLE-TABLE", 10, repo, FakeSession())
+    with pytest.raises(InvalidSku, match="Invalid sku GREY-MIDDLE-TABLE"):
+        service.allocate("order-1", "GREY-MIDDLE-TABLE", 10)
 
 
 def test_commits():
     repo, session_1 = FakeRepository(), FakeSession()
     session_2 = FakeSession()
-    services.add_batch("batch-11", "WHITE-LED-LAMP", 100, None, repo, session_1)
-    services.allocate("order-12", "WHITE-LED-LAMP", 2, repo, session_2)
+    service = OrderService(repo=repo, session=session_1)
+    service.add_batch("batch-11", "WHITE-LED-LAMP", 100, None)
+    service2 = OrderService(repo=repo, session=session_2)
+    service2.allocate("order-12", "WHITE-LED-LAMP", 2)
     assert session_1.committed is True
     assert session_2.committed is True

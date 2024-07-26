@@ -9,7 +9,7 @@
           POSTGRES_USER: admin
           POSTGRES_PASSWORD: test_password
         volumes:
-          - ./data:/var/lib/postgresql/data
+          - ../data:/var/lib/postgresql/data
         ports:
           - '172.17.0.1:5432:5432'
 
@@ -23,4 +23,4 @@
         ports:
           - "172.17.0.1:8080:8080"
         volumes:
-          - ./servers.json:/pgadmin4/servers.json
+          - ../servers.json:/pgadmin4/servers.json

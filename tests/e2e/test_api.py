@@ -23,21 +23,14 @@ def random_orderid(name=""):
 
 def post_to_add_batch(ref, sku, qty, eta):
     url = config.get_api_url()
+    print(url, "url")
     r = requests.post(
         f"{url}/add_batch", json={"ref": ref, "sku": sku, "qty": qty, "eta": eta}
     )
     assert r.status_code == 201
 
 
-@pytest.fixture(autouse=True)
-def clean_database(postgres_db):
-    # Clean up the database after each test
-    # Add your cleanup code here
-    pass
-
-
 @pytest.mark.usefixtures("postgres_db")
-@pytest.mark.usefixtures("restart_api")
 def test_happy_path_returns_201_and_allocated_batch():
     sku, othersku = random_sku(), random_sku("other")
     earlybatch = random_batchref(1)
@@ -56,7 +49,6 @@ def test_happy_path_returns_201_and_allocated_batch():
 
 
 @pytest.mark.usefixtures("postgres_db")
-@pytest.mark.usefixtures("restart_api")
 def test_unhappy_path_returns_400_and_error_message():
     unknown_sku, orderid = random_sku(), random_orderid()
     data = {"orderid": orderid, "sku": unknown_sku, "qty": 20}

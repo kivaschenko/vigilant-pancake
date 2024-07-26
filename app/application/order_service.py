@@ -1,8 +1,8 @@
 from typing import Optional
 from datetime import date
 
-from src.domain import model
-from src.infrastructure.repository import AbstractRepository
+from app.domain import model
+from app.infrastructure.batch_repository import AbstractRepository
 
 
 class InvalidSku(Exception):
@@ -29,6 +29,6 @@ class OrderService:
         self.session.commit()
         return batch_ref
 
+
 def is_valid_sku(sku, batches):
     return sku in {b.sku for b in batches}
-
