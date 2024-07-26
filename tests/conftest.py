@@ -1,51 +1,49 @@
 import time
-
+import asyncio
 import pytest
 from sqlalchemy.exc import OperationalError
-from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from app.infrastructure.orm import metadata, start_mappers, clear_mappers
-from config import Settings
-
-settings = Settings()
+from config import settings
 
 
-def wait_for_postgres_to_come_up(engine):
+async def wait_for_postgres_to_come_up(engine):
     deadline = time.time() + 10
     while time.time() < deadline:
         try:
-            return engine.connect()
+            async with engine.connect() as conn:
+                return conn
         except OperationalError:
-            time.sleep(0.5)
+            await asyncio.sleep(0.5)
     pytest.fail("Postgres never came up")
 
 
 @pytest.fixture(scope="session")
-def postgres_db():
-    engine = create_engine(settings.DATABASE_URL)
-    wait_for_postgres_to_come_up(engine)
-    metadata.create_all(engine)
+async def postgres_db():
+    engine = create_async_engine(settings.DATABASE_URL, echo=True)
+    await wait_for_postgres_to_come_up(engine)
+    async with engine.begin() as conn:
+        await conn.run_sync(metadata.create_all)
     return engine
 
 
 @pytest.fixture
-def postgres_session(postgres_db):
+async def postgres_session(postgres_db):
     start_mappers()
-    connection = postgres_db.connect()
-    transaction = connection.begin()
-    session = sessionmaker(bind=connection)()
-
-    yield session
-
-    session.close()
-    transaction.rollback()
-    connection.close()
+    async_session = sessionmaker(
+        postgres_db, expire_on_commit=False, class_=AsyncSession
+    )
+    async with async_session() as session:
+        async with session.begin():
+            yield session
     clear_mappers()
 
 
 @pytest.fixture(autouse=True)
-def clean_database(postgres_db):
+async def clean_database(postgres_db):
     """Clean up the database after each test"""
-    metadata.drop_all(postgres_db)
-    metadata.create_all(postgres_db)
+    async with postgres_db.begin() as conn:
+        await conn.run_sync(metadata.drop_all)
+        await conn.run_sync(metadata.create_all)

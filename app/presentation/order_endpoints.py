@@ -23,15 +23,14 @@ class OrderLineSchema(BaseModel):
     sku: str
     qty: int
 
+
 def get_repository(session: AsyncSession):
     return SQLAlchemyRepository(session)
+
 
 def get_order_service(session: AsyncSession = Depends(get_session)):
     repo = get_repository(session)
     return OrderService(repo, session)
-
-
-print(get_order_service(), "get_order_service")
 
 
 @router.post("/batches", status_code=status.HTTP_201_CREATED, tags=["orders"])
@@ -55,4 +54,6 @@ async def allocate_order(
         batch_ref = await service.allocate(line.orderid, line.sku, line.qty)
         return {"batch_ref": batch_ref}
     except InvalidSku as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid sku {e.sku}"
+        )
