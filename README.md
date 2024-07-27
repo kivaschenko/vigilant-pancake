@@ -22,7 +22,7 @@ poetry install
 ### Run app in development mode:
 
 ```
-fastapi dev src/main.py
+fastapi dev
 ```
 
 ### Run tests

@@ -37,7 +37,7 @@ def get_order_service(session: AsyncSession = Depends(get_session)):
 async def add_batch(
     batch: BatchSchema, service: OrderService = Depends(get_order_service)
 ):
-    await service.add_batch(batch.ref, batch.sku, batch.qty, batch.eta)
+    service.add_batch(batch.ref, batch.sku, batch.qty, batch.eta)
     return {"message": "Batch added"}
 
 

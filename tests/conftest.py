@@ -1,7 +1,6 @@
-import time
-import asyncio
 import pytest
-from sqlalchemy.exc import OperationalError
+import asyncio
+from sqlalchemy.sql import text
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
@@ -10,14 +9,14 @@ from config import settings
 
 
 async def wait_for_postgres_to_come_up(engine):
-    deadline = time.time() + 10
-    while time.time() < deadline:
+    while True:
         try:
             async with engine.connect() as conn:
-                return conn
-        except OperationalError:
-            await asyncio.sleep(0.5)
-    pytest.fail("Postgres never came up")
+                await conn.execute(text("SELECT 1"))
+            break
+        except Exception as e:
+            await asyncio.sleep(1)
+            print(e, "Retrying...")
 
 
 @pytest.fixture(scope="session")
@@ -26,7 +25,8 @@ async def postgres_db():
     await wait_for_postgres_to_come_up(engine)
     async with engine.begin() as conn:
         await conn.run_sync(metadata.create_all)
-    return engine
+    yield engine
+    await engine.dispose()
 
 
 @pytest.fixture
@@ -43,7 +43,6 @@ async def postgres_session(postgres_db):
 
 @pytest.fixture(autouse=True)
 async def clean_database(postgres_db):
-    """Clean up the database after each test"""
     async with postgres_db.begin() as conn:
         await conn.run_sync(metadata.drop_all)
         await conn.run_sync(metadata.create_all)

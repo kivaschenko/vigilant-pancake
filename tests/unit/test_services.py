@@ -25,6 +25,7 @@ class FakeSession:
         self.committed = True
         print("Committed")
 
+
 @pytest.mark.asyncio
 async def test_add_batch():
     repo, session = FakeRepository(), FakeSession()
@@ -32,6 +33,7 @@ async def test_add_batch():
     await service.add_batch("b1", "SOME-PRETTY-TABLE", 100, None)
     assert await repo.get("b1") is not None
     assert session.committed
+
 
 @pytest.mark.asyncio
 async def test_allocate_returns_allocation():
@@ -41,6 +43,7 @@ async def test_allocate_returns_allocation():
     result = await service.allocate("order-1", "SOME-PRETTY-TABLE", 10)
     assert result == "batch-1"
 
+
 @pytest.mark.asyncio
 async def test_allocate_errors_invalid_sku():
     repo, session = FakeRepository(), FakeSession()
@@ -49,6 +52,7 @@ async def test_allocate_errors_invalid_sku():
 
     with pytest.raises(InvalidSku, match="Invalid sku GREY-MIDDLE-TABLE"):
         await service.allocate("order-1", "GREY-MIDDLE-TABLE", 10)
+
 
 @pytest.mark.asyncio
 async def test_commits():

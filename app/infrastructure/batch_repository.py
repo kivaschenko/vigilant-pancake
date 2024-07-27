@@ -1,21 +1,23 @@
+# batch_repository.py
 import abc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.domain import model
+from app.domain import batch
 
 
 class AbstractRepository(abc.ABC):
     @abc.abstractmethod
-    async def add(self, batch: model.Batch):
+    async def add(self, batch: batch.Batch):
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def get(self, reference) -> model.Batch:
+    async def get(self, reference) -> batch.Batch:
         raise NotImplementedError
 
     @abc.abstractmethod
     async def list(self):
         raise NotImplementedError
+
 
 
 class SQLAlchemyRepository(AbstractRepository):
@@ -24,11 +26,12 @@ class SQLAlchemyRepository(AbstractRepository):
 
     async def add(self, batch):
         await self.session.add(batch)
+        await self.session.commit()
 
-    async def get(self, reference) -> model.Batch:
-        result = await self.session.query(model.Batch).filter_by(reference=reference)
+    async def get(self, reference) -> batch.Batch:
+        result = await self.session.execute(select(batch.Batch).filter_by(reference=reference))
         return result.scalar_one()
 
     async def list(self):
-        result = await self.session.execute(select(model.Batch))
+        result = await self.session.execute(select(batch.Batch))
         return result.scalars().all()

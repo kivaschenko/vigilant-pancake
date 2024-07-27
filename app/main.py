@@ -11,10 +11,12 @@ app = FastAPI()
 # Ensure mappers are started before any database operations
 start_mappers()
 
+
 @app.get("/")
 async def read_root(session: AsyncSession = Depends(get_session)):
     result = await session.execute(text("SELECT 1"))
     return {"Hello": "World", "result": result.scalar()}
 
+
 # Include the order router
-app.include_router(order_router, prefix="/orders", tags=["orders"])
+app.include_router(order_router, tags=["orders"])

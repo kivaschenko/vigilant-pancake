@@ -2,7 +2,7 @@ from sqlalchemy import Table, MetaData, Column, Integer, String, Date, ForeignKe
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import registry
 
-from app.domain import model
+from app.domain import batch
 
 
 metadata = MetaData()
@@ -46,9 +46,9 @@ def start_mappers():
     global mappers_started
     if mappers_started:
         return
-    lines_mapper = mapper_registry.map_imperatively(model.OrderLine, order_lines)
+    lines_mapper = mapper_registry.map_imperatively(batch.OrderLine, order_lines)
     mapper_registry.map_imperatively(
-        model.Batch,
+        batch.Batch,
         batches,
         properties={
             "_allocations": relationship(
