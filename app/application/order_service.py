@@ -1,7 +1,6 @@
 from typing import Optional
 from datetime import date
-from sqlalchemy.ext.asyncio import AsyncSession
-
+import asyncpg
 from app.domain import batch
 from app.infrastructure.batch_repository import AbstractRepository
 
@@ -11,16 +10,15 @@ class InvalidSku(Exception):
 
 
 class OrderService:
-    def __init__(self, repo: AbstractRepository, session: AsyncSession):
+    def __init__(self, repo: AbstractRepository, connection: asyncpg.Connection):
         self.repo = repo
-        self.session = session
+        self.connection = connection
 
     async def add_batch(
         self, ref: str, sku: str, qty: int, eta: Optional[date]
     ) -> None:
-        async with self.session.begin():
-            repo = self.repo(session=self.session)
-            await repo.add(batch.Batch(ref, sku, qty, eta))
+        repo = self.repo(connection=self.connection)
+        await repo.add(batch.Batch(ref, sku, qty, eta))
 
     async def allocate(self, order_id: str, sku: str, qty: int) -> str:
         line = batch.OrderLine(orderid=order_id, sku=sku, qty=qty)
@@ -28,7 +26,6 @@ class OrderService:
         if not is_valid_sku(line.sku, batches):
             raise InvalidSku(f"Invalid sku {line.sku}")
         batch_ref = batch.allocate(line, batches)
-        # await self.session.commit()
         return batch_ref
 
 

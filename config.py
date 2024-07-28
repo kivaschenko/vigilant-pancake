@@ -28,7 +28,7 @@ class Settings(BaseSettings):
         This is useful if you want to do some validation that requires the entire model to be initialized.
         """
         if not self.DATABASE_URL:
-            self.DATABASE_URL = f"postgresql+asyncpg://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
+            self.DATABASE_URL = f"postgresql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
 
     class Config:
         env_file = ".env"

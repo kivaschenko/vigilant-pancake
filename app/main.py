@@ -1,21 +1,30 @@
 from fastapi import FastAPI, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql import text
-from app.infrastructure.database import get_session
-from app.infrastructure.orm import start_mappers
+from contextlib import asynccontextmanager
+from app.infrastructure.database import Database
 from app.presentation.order_endpoints import router as order_router
 
 
-app = FastAPI()
+# Initialize the database connection pool
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await Database.init()
+    print("Database initialized")
+    await Database.create_tables()
+    try:
+        yield
+        print("Database closed")
+    finally:
+        await Database._pool.close()
 
-# Ensure mappers are started before any database operations
-start_mappers()
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/")
-async def read_root(session: AsyncSession = Depends(get_session)):
-    result = await session.execute(text("SELECT 1"))
-    return {"Hello": "World", "result": result.scalar()}
+async def read_root(db: Database = Depends(Database)):
+    async with db._pool.acquire() as connection:
+        result = await connection.execute("SELECT 1")
+    return {"Hello": "World", "result": result}
 
 
 # Include the order router
