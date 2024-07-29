@@ -24,8 +24,9 @@ class Settings(BaseSettings):
     api_url: str = "http://localhost:8000"
 
     def model_post_init(self, __context: Any) -> None:
-        """Override this method to perform additional initialization after `__init__` and `model_construct`.
-        This is useful if you want to do some validation that requires the entire model to be initialized.
+        """Override this method to perform additional initialization after `__init__`
+        and `model_construct`. This is useful if you want to do some validation that
+        requires the entire model to be initialized.
         """
         if not self.DATABASE_URL:
             self.DATABASE_URL = f"postgresql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
